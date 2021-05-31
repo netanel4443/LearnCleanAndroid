@@ -30,7 +30,8 @@ class EndlessScrollListener<T>( ):RecyclerView.OnScrollListener() {
         val offset = recyclerView.computeVerticalScrollOffset()
         val extent = recyclerView.computeVerticalScrollExtent()
         val range = recyclerView.computeVerticalScrollRange()
-        val percentage = (100.0f * offset / (range - extent).toFloat()).roundToInt()
+            //todo fix roundtoint bug
+        val percentage = (100.0f * offset / (range - extent).toFloat()).toInt()
 //        printIfDebug(percentage)
         if (percentage>=percentageToLoadMoreItems ) {
 

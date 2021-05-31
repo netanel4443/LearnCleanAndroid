@@ -2,39 +2,34 @@ package com.e.learningcleanandroid.database
 
 import com.e.androidcleanarchitecture.di.scopes.ActivityScope
 import com.e.learningcleanandroid.api.data.Breeds
-import com.e.learningcleanandroid.api.data.DogPhotos
+import com.e.learningcleanandroid.api.data.DogPhoto
 import com.e.learningcleanandroid.database.configs.GeneralDogImagesConfig
 import com.e.learningcleanandroid.database.data.cachedDogPhotos.CachedDogBreedsRealmObj
 import com.e.learningcleanandroid.database.data.cachedDogPhotos.CachedDogPhotosRealmObj
-import com.e.learningcleanandroid.utils.logs.printErrorIfDebug
 import com.e.learningcleanandroid.utils.logs.printIfDebug
-import com.e.learningcleanandroid.utils.realm.rxObservableExecuteTransactionAsync
+import com.e.learningcleanandroid.utils.realm.rxCompletableExecuteTransactionAsync
+import com.e.learningcleanandroid.utils.realm.rxSingleExecuteTransactionAsync
 import com.e.learningcleanandroid.utils.realm.toArrayList
 import io.reactivex.rxjava3.core.Completable
 import io.reactivex.rxjava3.core.Single
 import io.realm.Realm
-import java.lang.Exception
 import javax.inject.Inject
 
 @ActivityScope
 class CachedDogPhotosRepo @Inject constructor(private val config:GeneralDogImagesConfig) {
     val realm: Realm =  config.getRealmInstance()
     // if there is no cached data , return an empty array
-  fun getCachedDogPhotos():Single<ArrayList<DogPhotos>>{
-    return  Single.fromCallable {
-
-        val arrayList=ArrayList<DogPhotos>()
-       try {
-          realm.rxObservableExecuteTransactionAsync {realm->
-
+  fun getCachedDogPhotos():Single<ArrayList<DogPhoto>>{
+    return realm.rxSingleExecuteTransactionAsync{realm->
+             val arrayList=ArrayList<DogPhoto>()
                 printIfDebug("get cached dog images")
                 val cachedArrayList= realm.where(CachedDogPhotosRealmObj::class.java)
                         .findAll()?.toArrayList()
 
-                if (cachedArrayList==null) {return@rxObservableExecuteTransactionAsync }
+                if (cachedArrayList==null) { return@rxSingleExecuteTransactionAsync arrayList }
 
                 cachedArrayList.forEach { cachedDogObj->
-                    val theDogPhoto= DogPhotos(
+                    val theDogPhoto= DogPhoto(
                             id=cachedDogObj.id,
                             url=cachedDogObj.url,
                     )
@@ -53,72 +48,52 @@ class CachedDogPhotosRepo @Inject constructor(private val config:GeneralDogImage
                     }
                     theDogPhoto.breeds= breedsArray
                     arrayList.add(theDogPhoto)
-                    println("array size ${arrayList.size}")
 
                 }
+           return@rxSingleExecuteTransactionAsync arrayList
            }
-        }
-        catch (e:Exception){ printErrorIfDebug(e)}
-        finally {
-
-        }
-        println("array size ${arrayList.size}")
-        return@fromCallable arrayList
-
     }
-  }
+
    private fun deletePrevCachedDogImages():Completable {
-        return Completable.fromAction {
-
-            try {
-                realm.executeTransactionAsync {realm->
-                    printIfDebug("delete cached dog images")
-                    realm.where(CachedDogPhotosRealmObj::class.java)
-                            .findAll()?.deleteAllFromRealm()
-                }
-            } catch (e: Exception) {
-                printErrorIfDebug(e)
+        return realm.rxCompletableExecuteTransactionAsync {realm->
+                printIfDebug("delete cached dog images")
+                realm.where(CachedDogPhotosRealmObj::class.java)
+                        .findAll()?.deleteAllFromRealm()
             }
-        }
-    }
+   }
 
-  fun cacheDogPhotos(dogPhotosArr:ArrayList<DogPhotos>):Completable{
+
+  fun cacheDogPhotos(dogPhotosArr:ArrayList<DogPhoto>):Completable{
     return deletePrevCachedDogImages()
             .concatWith(saveDogImages(dogPhotosArr))
 
   }
 
-  private fun saveDogImages(dogPhotosArr:ArrayList<DogPhotos>):Completable{
-        return Completable.fromAction(){
-            try {
-                realm.executeTransactionAsync {realm->
-                    printIfDebug("save cached dog images")
+  private fun saveDogImages(dogPhotosArr:ArrayList<DogPhoto>):Completable{
 
-                    dogPhotosArr.forEach {dogPhoto->
-                        val cachedDogPhoto=realm.createObject(CachedDogPhotosRealmObj::class.java)
-                        //todo should we trust the api to have an id for any image ?
-                        cachedDogPhoto.id=dogPhoto.id!! // probably, the object obtained from api must have an id
-                        cachedDogPhoto.url=dogPhoto.url ?: "" //if no url , save an empty string
+     return realm.rxCompletableExecuteTransactionAsync {realm->
+                  printIfDebug("save cached dog images")
 
-                        val breedsArr=dogPhoto.breeds
+                  dogPhotosArr.forEach {dogPhoto->
+                      // probably, the object obtained from api must have an id
+                      val cachedDogPhoto=realm.createObject(CachedDogPhotosRealmObj::class.java,dogPhoto.id!!)
+                      //todo should we trust the api to have an id for any image ?
 
-                        val breedsRealmObj= CachedDogBreedsRealmObj()
+                      cachedDogPhoto.url=dogPhoto.url ?: "" //if no url , save an empty string
 
-                        if (breedsArr !=null && breedsArr.isNotEmpty()){ //in case no breeds at all
+                      val breedsArr=dogPhoto.breeds
+
+                      val breedsRealmObj= CachedDogBreedsRealmObj()
+
+                      if (breedsArr !=null && breedsArr.isNotEmpty()){ //in case no breeds at all
                             val breeds=breedsArr.first()
                             breedsRealmObj.name=breeds.name ?: "unknown"
                             breedsRealmObj.origin=breeds.origin ?: "unknown"
                             breedsRealmObj.lifeSpan=breeds.lifeSpan ?: "unknown"
                             cachedDogPhoto.breeds.add(breedsRealmObj)// add only if we have breeds otherwise, keep an empty array
-                        printIfDebug(breeds)
-                        }
-
-
-                        realm.insertOrUpdate(cachedDogPhoto)
-                    }
-                }
-            }
-            catch (e:Exception){ printErrorIfDebug(e) }
-        }
-    }
+                      }
+                      realm.insertOrUpdate(cachedDogPhoto)
+                  }
+              }
+     }
 }

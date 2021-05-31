@@ -1,22 +1,22 @@
 package com.e.androidcleanarchitecture.ui.recyclerview.adapters
 
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
-import android.widget.SimpleAdapter
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewbinding.ViewBinding
 import com.e.androidcleanarchitecture.ui.recyclerview.viewholders.GenericViewHolder
+import com.e.learningcleanandroid.ui.recyclerview.helpers.ItemClickViewHolderHelper
 
 open class GenericRecyclerViewAdapter<T>:RecyclerView.Adapter<GenericViewHolder<T>>() {
 
     val items=ArrayList<T>()
     private var shouldLoadMoreItems=true
 
+    protected var itemClick:ItemClickViewHolderHelper?=null
+
     fun addItems(items:ArrayList<T>){
         this.items.addAll(items)
         notifyDataSetChanged()
-        println("here")
         shouldLoadMoreItems(false)
     }
 
@@ -25,10 +25,18 @@ open class GenericRecyclerViewAdapter<T>:RecyclerView.Adapter<GenericViewHolder<
         notifyDataSetChanged()
     }
 
+    fun removeItem(position: Int){
+        items.removeAt(position)
+        notifyItemRemoved(position)
+    }
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): GenericViewHolder<T> {
         val inflater=LayoutInflater.from(parent.context)
         val view=inflater.inflate(viewType,parent,false)
-        return GenericViewHolder(view as ViewBinding)
+        val viewHolder = GenericViewHolder<T>(view as ViewBinding)
+            viewHolder.setItemClickHelper(itemClick)
+        return viewHolder
+
     }
 
     override fun onBindViewHolder(holder: GenericViewHolder<T>, position: Int) {
@@ -37,6 +45,11 @@ open class GenericRecyclerViewAdapter<T>:RecyclerView.Adapter<GenericViewHolder<
 
     override fun getItemCount(): Int {
         return items.size
+    }
+
+    fun setItemClickHelper(helper:ItemClickViewHolderHelper){
+        itemClick=helper
+
     }
 
     fun isEmpty():Boolean= itemCount==0

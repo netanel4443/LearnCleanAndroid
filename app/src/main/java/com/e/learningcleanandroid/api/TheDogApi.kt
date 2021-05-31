@@ -1,6 +1,6 @@
 package com.e.learningcleanandroid.api
 
-import com.e.learningcleanandroid.api.data.DogPhotos
+import com.e.learningcleanandroid.api.data.DogPhoto
 import io.reactivex.rxjava3.core.Observable
 
 import retrofit2.Response
@@ -14,5 +14,5 @@ interface TheDogApi {
     @GET("v1/images/search?size=small")
     fun getPhotos(
             @Query("limit") limit:String="10"
-    ): Observable<Response<ArrayList<DogPhotos>>>
+    ): Observable<Response<ArrayList<DogPhoto>>>
 }

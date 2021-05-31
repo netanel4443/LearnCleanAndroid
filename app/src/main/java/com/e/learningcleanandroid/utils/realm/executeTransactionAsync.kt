@@ -12,8 +12,8 @@ import java.util.*
 fun <T> Realm.rxObservableExecuteTransactionAsync(block:(Realm)->T):Observable<T>{
    return Observable.create {emitter->
         try {
-            executeTransactionAsync {
-                emitter.onNext( block() )
+            executeTransactionAsync {realm->
+                emitter.onNext( block(realm) )
             }
         }catch (e:Exception){
             printErrorIfDebug(e)
@@ -26,11 +26,11 @@ fun <T> Realm.rxObservableExecuteTransactionAsync(block:(Realm)->T):Observable<T
 
 }
 
-fun <T> Realm.rxSingleExecuteTransactionAsync(block:()->T): Single<T> {
+fun <T> Realm.rxSingleExecuteTransactionAsync(block:(Realm)->T): Single<T> {
     return Single.create {emitter->
         try {
-            executeTransactionAsync {
-                emitter.onSuccess( block() )
+            executeTransactionAsync {realm->
+                emitter.onSuccess( block(realm) )
             }
         }catch (e:Exception){
             printErrorIfDebug(e)
@@ -40,10 +40,10 @@ fun <T> Realm.rxSingleExecuteTransactionAsync(block:()->T): Single<T> {
 
 }
 
-fun <T> Realm.rxCompletableExecuteTransactionAsync(block:()->Unit):Completable{
+fun  Realm.rxCompletableExecuteTransactionAsync(block:(Realm)->Unit):Completable{
     return Completable.create {emitter->
         try {
-            executeTransactionAsync { block() }
+            executeTransactionAsync {realm-> block(realm) }
         }catch (e:Exception){
             printErrorIfDebug(e)
             emitter.onError(e)

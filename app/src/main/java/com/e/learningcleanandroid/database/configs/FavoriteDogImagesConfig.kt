@@ -3,9 +3,10 @@ package com.e.learningcleanandroid.database.configs
 import com.e.androidcleanarchitecture.di.scopes.ApplicationScope
 import io.realm.Realm
 import io.realm.RealmConfiguration
+import javax.inject.Inject
 
 @ApplicationScope
-class FavoriteDogImagesConfig {
+class FavoriteDogImagesConfig @Inject constructor(){
 
 
     private lateinit var realmName:String

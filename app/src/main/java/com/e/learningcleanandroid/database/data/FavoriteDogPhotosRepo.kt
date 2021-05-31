@@ -2,11 +2,13 @@ package com.e.learningcleanandroid.database.data
 
 import com.e.androidcleanarchitecture.di.scopes.ActivityScope
 import com.e.learningcleanandroid.api.data.Breeds
-import com.e.learningcleanandroid.api.data.DogPhotos
+import com.e.learningcleanandroid.api.data.DogPhoto
 import com.e.learningcleanandroid.database.configs.FavoriteDogImagesConfig
 import com.e.learningcleanandroid.database.data.cachedDogPhotos.CachedDogBreedsRealmObj
 import com.e.learningcleanandroid.database.data.cachedDogPhotos.CachedDogPhotosRealmObj
 import com.e.learningcleanandroid.utils.logs.printErrorIfDebug
+import com.e.learningcleanandroid.utils.realm.rxCompletableExecuteTransactionAsync
+import com.e.learningcleanandroid.utils.realm.rxSingleExecuteTransactionAsync
 import com.e.learningcleanandroid.utils.realm.toArrayList
 import io.reactivex.rxjava3.core.Completable
 import io.reactivex.rxjava3.core.Single
@@ -22,18 +24,15 @@ class FavoriteDogPhotosRepo @Inject constructor(private val config:FavoriteDogIm
      * the default value of [CachedDogBreedsRealmObj] array in [CachedDogPhotosRealmObj] is an empty array.
 
      **/
-     fun saveFavoritePhoto(favoriteDogPhoto:DogPhotos): Single<Boolean> {
+     fun saveFavoritePhoto(favoriteDogPhoto:DogPhoto): Single<Boolean> {
 
-       return Single.fromCallable {
-           var isSaved=false
-            try{
-                realm.executeTransactionAsync {realm->
+       return realm.rxSingleExecuteTransactionAsync {realm->
                     val result= realm.where(CachedDogPhotosRealmObj::class.java)
                             .equalTo("id",favoriteDogPhoto.id)
                             .findFirst()
 
                     if (result!= null) {// if the photo is already saved, don't save it again
-                        return@executeTransactionAsync // isSaved = false
+                        return@rxSingleExecuteTransactionAsync false // isSaved = false
                     }
 
                     val dogPhotoRealmObj=realm.createObject(CachedDogPhotosRealmObj::class.java,favoriteDogPhoto.id)
@@ -52,29 +51,24 @@ class FavoriteDogPhotosRepo @Inject constructor(private val config:FavoriteDogIm
                     //todo
                     // if we arrived here, will the code return true because the object
                     // has been saved, or we can arrive here and the code returns true even if an error was thrown ?
-                    isSaved=true
+                 return@rxSingleExecuteTransactionAsync true
                 }
-
-            }catch (e:Exception){ printErrorIfDebug(e)}
-          return@fromCallable isSaved
-        }
     }
 
 
     // if there is no saved data (favorite photos) , return an empty array
-    fun getFavoriteDogPhotos(): Single<ArrayList<DogPhotos>> {
+    fun getFavoriteDogPhotos(): Single<ArrayList<DogPhoto>> {
 
-       return Single.fromCallable{
-           val arrayList=ArrayList<DogPhotos>()
-           try {
-                 realm.executeTransactionAsync {realm->
-                    val favoriteDogsArray=realm.where(CachedDogPhotosRealmObj::class.java)
+       return realm.rxSingleExecuteTransactionAsync {realm->
+           val arrayList=ArrayList<DogPhoto>()
+
+           val favoriteDogsArray=realm.where(CachedDogPhotosRealmObj::class.java)
                             .findAll()?.toArrayList()
 
-                    if (favoriteDogsArray==null) return@executeTransactionAsync
+                    if (favoriteDogsArray==null) return@rxSingleExecuteTransactionAsync arrayList
 
                     favoriteDogsArray.forEach { cachedDogObj->
-                        val theDogPhoto= DogPhotos(
+                        val theDogPhoto= DogPhoto(
                                 id=cachedDogObj.id,
                                 url=cachedDogObj.url,
                         )
@@ -95,22 +89,19 @@ class FavoriteDogPhotosRepo @Inject constructor(private val config:FavoriteDogIm
                         theDogPhoto.breeds= breedsArray
                         arrayList.add(theDogPhoto)
                     }
-                }
-           }catch (e:Exception){ printErrorIfDebug(e)}
-         return@fromCallable  arrayList
+           return@rxSingleExecuteTransactionAsync arrayList
        }
     }
 
     fun deleteFavoritePhoto(photoId:String):Completable{
 
         return Completable.fromAction{
-            try {
-                realm.executeTransactionAsync {realm->
+                realm.rxCompletableExecuteTransactionAsync {realm->
                     realm.where(CachedDogPhotosRealmObj::class.java)
-                            .equalTo("id",photoId)
-                            .findFirst()?.deleteFromRealm()
+                        .equalTo("id",photoId)
+                        .findFirst()?.deleteFromRealm()
                 }
-            }catch (e:Exception){ printErrorIfDebug(e)}
+
         }
 
     }

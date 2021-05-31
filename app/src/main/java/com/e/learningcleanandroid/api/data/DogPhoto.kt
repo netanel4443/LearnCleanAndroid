@@ -3,7 +3,7 @@ package com.e.learningcleanandroid.api.data
 import com.google.gson.annotations.SerializedName
 import java.lang.StringBuilder
 
-data class DogPhotos (
+data class DogPhoto (
 
    @SerializedName("id")
    var id:String?=null,
