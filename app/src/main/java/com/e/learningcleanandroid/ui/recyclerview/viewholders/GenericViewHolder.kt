@@ -10,7 +10,7 @@ open class GenericViewHolder<T>(binding: ViewBinding):RecyclerView.ViewHolder(bi
     private var _clickHelper:ItemClickViewHolderHelper?=null
     protected val clickHelper get() = _clickHelper
 
-    override fun bind(item: T,position:Int) {}
+    override fun bind(item: T) {}
 
     override fun setItemClickHelper(helper: ItemClickViewHolderHelper?) {
         _clickHelper=helper

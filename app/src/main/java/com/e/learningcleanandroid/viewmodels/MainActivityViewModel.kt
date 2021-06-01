@@ -38,7 +38,8 @@ class MainActivityViewModel @Inject constructor(
         _viewState.postMviValue(value)
     }
 
-    fun loadDogPhotos(){
+    fun getCachedDogPhotos(){
+        if (_viewState.value!!.second.dogPhotos.isEmpty()){
         useCases.getCachedDogPhotos()
             .doOnSuccess { cachedDogPhotos ->
                 val copy=  _viewState.currState()?.copy(dogPhotos = cachedDogPhotos)
@@ -50,7 +51,9 @@ class MainActivityViewModel @Inject constructor(
             }
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe({},::printIfDebug)
+        }
     }
+
 
     private fun getDogPhotos(){
         compositeDisposable.add(api.getDogPhotosRequest()
@@ -97,16 +100,19 @@ class MainActivityViewModel @Inject constructor(
     }
 
     fun getFavoriteDogPhotos(){
+        //get favorite photos from db only if we haven't received it yet
+        if (_viewState.currState()!!.favoriteDogPhotos.isEmpty()){
         favoriteDogPhotosUseCases.getCachedDogPhotos()
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe({favoriteDogPhotos->
+                println(favoriteDogPhotos.size)
                 setMviValue(_viewState.currState()?.copy(favoriteDogPhotos =  favoriteDogPhotos)!!)
             },::printErrorIfDebug)
+        }
     }
 
-    fun deleteFavoriteDogPhoto(photoId:String?,position:Int) {
-        //todo delete nullable
-        favoriteDogPhotosUseCases.deleteFavoriteDogPhoto(photoId!!)
+    fun deleteFavoriteDogPhoto(photoId:String,position:Int) {
+        favoriteDogPhotosUseCases.deleteFavoriteDogPhoto(photoId)
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe({
                 val copy=_viewState.currState()?.copy()

@@ -76,6 +76,13 @@ class CachedDogPhotosRepo @Inject constructor(private val config:GeneralDogImage
 
                   dogPhotosArr.forEach {dogPhoto->
                       // probably, the object obtained from api must have an id
+                      val result= realm.where(CachedDogPhotosRealmObj::class.java)
+                              .equalTo("id",dogPhoto.id)
+                              .findFirst()
+
+                      if (result!= null) {
+                          return@forEach //Skips the continuation of the forEach loop only for this item!
+                      }
                       val cachedDogPhoto=realm.createObject(CachedDogPhotosRealmObj::class.java,dogPhoto.id!!)
                       //todo should we trust the api to have an id for any image ?
 

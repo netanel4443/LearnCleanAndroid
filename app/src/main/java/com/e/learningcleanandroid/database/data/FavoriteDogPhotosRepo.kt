@@ -48,9 +48,7 @@ class FavoriteDogPhotosRepo @Inject constructor(private val config:FavoriteDogIm
                         dogPhotoRealmObj.breeds.add(breedsRealmObj)
                     }
                     realm.insertOrUpdate(dogPhotoRealmObj)
-                    //todo
-                    // if we arrived here, will the code return true because the object
-                    // has been saved, or we can arrive here and the code returns true even if an error was thrown ?
+
                  return@rxSingleExecuteTransactionAsync true
                 }
     }
@@ -94,15 +92,10 @@ class FavoriteDogPhotosRepo @Inject constructor(private val config:FavoriteDogIm
     }
 
     fun deleteFavoritePhoto(photoId:String):Completable{
-
-        return Completable.fromAction{
-                realm.rxCompletableExecuteTransactionAsync {realm->
+          return  realm.rxCompletableExecuteTransactionAsync {realm->
                     realm.where(CachedDogPhotosRealmObj::class.java)
                         .equalTo("id",photoId)
                         .findFirst()?.deleteFromRealm()
-                }
-
-        }
-
+                  }
     }
 }

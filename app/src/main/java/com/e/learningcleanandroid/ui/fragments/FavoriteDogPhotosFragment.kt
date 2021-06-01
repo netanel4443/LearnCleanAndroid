@@ -48,7 +48,8 @@ class FavoriteDogPhotosFragment : BaseFragment() {
         initEventsObservable()
 
 
-            viewModel.getFavoriteDogPhotos()
+        viewModel.getFavoriteDogPhotos()
+
 
     }
 
@@ -68,7 +69,7 @@ class FavoriteDogPhotosFragment : BaseFragment() {
         favoriteDogPhotosAdapter= FavoriteDogPhotosRecyclerViewAdapter()
         recyclerView.adapter=favoriteDogPhotosAdapter
         favoriteDogPhotosAdapter.setItemClickHelper(object :FavoriteDogPhotosViewHolderClickHelper{
-            override fun onFavoriteIconCLick(photoId: String?,position:Int) {
+            override fun onFavoriteIconCLick(photoId: String,position:Int) {
                 favoriteDogPhotosAdapter.removeItem(position)
                 viewModel.deleteFavoriteDogPhoto(photoId,position)
             }
@@ -84,8 +85,7 @@ class FavoriteDogPhotosFragment : BaseFragment() {
         viewModel.viewStates.observe(viewLifecycleOwner,  {
             val oldState=it.first
             val newState=it.second
-            val tmpArrayList=newState.favoriteDogPhotos.subList(oldState.favoriteDogPhotos.lastIndex,newState.favoriteDogPhotos.lastIndex)
-            favoriteDogPhotosAdapter.addItems(tmpArrayList as ArrayList<DogPhoto>)
+            favoriteDogPhotosAdapter.addItems(it.second.favoriteDogPhotos)
         })
     }
 

@@ -1,8 +1,16 @@
 package com.e.learningcleanandroid.utils.livedata
 
-class MviPrevAndNow<T> {
+class MviPrevAndNow< T>(private val initialValue:T) {
+    var prevValue:T
+    var currentValue:T
 
-    var prevValue:T?=null
-    var currentValue:T?=null
+
+    init {
+        currentValue=initialValue
+        prevValue=initialValue
+    }
+
+
+
 
 }

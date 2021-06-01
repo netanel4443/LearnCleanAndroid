@@ -4,7 +4,7 @@ import com.e.learningcleanandroid.ui.recyclerview.helpers.ItemClickViewHolderHel
 
 interface ViewHolderHelper<T> {
 
-    fun bind(item:T,position:Int)
+    fun bind(item:T)
 
     fun setItemClickHelper(helper:ItemClickViewHolderHelper?)
 }

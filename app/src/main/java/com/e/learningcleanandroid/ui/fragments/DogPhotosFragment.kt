@@ -44,9 +44,9 @@ class DogPhotosFragment : BaseFragment() {
         initStateObservable()
         /* if no items, invoke. This line is added in order to prevent
                 unnecessary calls due configuration changes*/
-        if (dogPhotosAdapter.isEmpty()){
-            viewModel.loadDogPhotos()
-        }
+
+            viewModel.getCachedDogPhotos()
+
     }
 
     private fun initRecyclerView(recyclerView:RecyclerView,context: Context) {
@@ -80,7 +80,6 @@ class DogPhotosFragment : BaseFragment() {
             val newState=it.second
 
             if (dogPhotosAdapter.canLoadMoreItems()){
-//                newState.dogPhotos.removeAll(oldState.dogPhotos)
                 dogPhotosAdapter.addItems(newState.dogPhotos)
             }
         })
