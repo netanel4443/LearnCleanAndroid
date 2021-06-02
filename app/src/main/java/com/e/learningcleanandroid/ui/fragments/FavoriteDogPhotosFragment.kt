@@ -16,6 +16,7 @@ import com.e.learningcleanandroid.ui.recyclerview.adapters.FavoriteDogPhotosRecy
 import com.e.learningcleanandroid.ui.recyclerview.helpers.EndlessScrollListener
 import com.e.learningcleanandroid.ui.recyclerview.onviewclickinterfaces.DogPhotosViewHolderHelperClicks
 import com.e.learningcleanandroid.ui.recyclerview.onviewclickinterfaces.FavoriteDogPhotosViewHolderClickHelper
+import com.e.learningcleanandroid.utils.arraylist.newItemsSubList
 import com.e.learningcleanandroid.utils.logs.printIfDebug
 import com.e.learningcleanandroid.viewmodels.MainActivityViewModel
 import com.e.learningcleanandroid.viewmodels.events.MainActivityEvents
@@ -85,7 +86,10 @@ class FavoriteDogPhotosFragment : BaseFragment() {
         viewModel.viewStates.observe(viewLifecycleOwner,  {
             val oldState=it.first
             val newState=it.second
-            favoriteDogPhotosAdapter.addItems(it.second.favoriteDogPhotos)
+                println("${oldState.favoriteDogPhotos.size}=${newState.favoriteDogPhotos.size}")
+            if (oldState.favoriteDogPhotos!=newState.favoriteDogPhotos){
+                favoriteDogPhotosAdapter.addItems(newState.favoriteDogPhotos)
+            }
         })
     }
 

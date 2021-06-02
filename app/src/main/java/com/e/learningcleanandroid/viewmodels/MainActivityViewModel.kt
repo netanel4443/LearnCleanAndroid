@@ -8,8 +8,10 @@ import com.e.learningcleanandroid.api.MainActivityApi
 import com.e.learningcleanandroid.api.data.DogPhoto
 import com.e.learningcleanandroid.usecases.FavoriteDogPhotosUseCases
 import com.e.learningcleanandroid.usecases.MainActivityUseCases
+import com.e.learningcleanandroid.utils.arraylist.addFilteredItems
 import com.e.learningcleanandroid.utils.logs.printErrorIfDebug
 import com.e.learningcleanandroid.utils.logs.printIfDebug
+import com.e.learningcleanandroid.utils.toArrayList
 import com.e.learningcleanandroid.viewmodels.common.BaseViewModel
 import com.e.learningcleanandroid.viewmodels.events.MainActivityEvents
 import com.e.learningcleanandroid.viewmodels.states.MainActivityStates
@@ -64,8 +66,11 @@ class MainActivityViewModel @Inject constructor(
                     //todo check if body can be null
                     response.body()?.let {body->
                         val copy= _viewState.currState()?.copy()
-                        copy?.dogPhotos?.addAll(body)
-                        setMviValue(copy!!)
+                        val tmpArrayList=ArrayList<DogPhoto>()
+                        tmpArrayList.addAll(copy?.dogPhotos!!)
+                        tmpArrayList.addFilteredItems(body)
+                        copy.dogPhotos=tmpArrayList
+                        setMviValue(copy)
                         cacheDogPhotos(copy.dogPhotos)
                     }
                 }
@@ -87,9 +92,12 @@ class MainActivityViewModel @Inject constructor(
         favoriteDogPhotosUseCases.saveFavoritePhoto(dogPhoto)
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe({isSaved->
-                val copy=_viewState.currState()?.copy()
-                copy!!.favoriteDogPhotos.add(dogPhoto)
-                setMviValue(copy)
+                val copy=_viewState.currState()?.copy()!!.favoriteDogPhotos
+                val tmpArray=ArrayList<DogPhoto>()
+                tmpArray.addAll(copy)
+                tmpArray.add(dogPhoto)
+
+                setMviValue(_viewState.currState()?.copy(favoriteDogPhotos = tmpArray)!!)
 
                 val text=   if(isSaved) { "Saved" }
                 else{ "Already Saved" }
@@ -115,8 +123,11 @@ class MainActivityViewModel @Inject constructor(
         favoriteDogPhotosUseCases.deleteFavoriteDogPhoto(photoId)
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe({
-                val copy=_viewState.currState()?.copy()
-                copy!!.favoriteDogPhotos.removeAt(position)
+                val tmpArrayList=ArrayList<DogPhoto>()
+                val copy=_viewState.currState()?.copy()!!.favoriteDogPhotos
+                tmpArrayList.addAll(copy)
+                tmpArrayList.removeAt(position)
+                setMviValue(_viewState.currState()?.copy(favoriteDogPhotos = tmpArrayList)!!)
             },::printErrorIfDebug)
     }
 

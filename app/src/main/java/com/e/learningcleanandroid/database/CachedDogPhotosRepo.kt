@@ -48,7 +48,7 @@ class CachedDogPhotosRepo @Inject constructor(private val config:GeneralDogImage
                     }
                     theDogPhoto.breeds= breedsArray
                     arrayList.add(theDogPhoto)
-
+                    println("cahced ${arrayList.size}")
                 }
            return@rxSingleExecuteTransactionAsync arrayList
            }

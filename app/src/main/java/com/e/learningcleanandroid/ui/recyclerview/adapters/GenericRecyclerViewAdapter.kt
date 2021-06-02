@@ -7,6 +7,7 @@ import androidx.viewbinding.ViewBinding
 import com.e.androidcleanarchitecture.ui.recyclerview.viewholders.GenericViewHolder
 import com.e.learningcleanandroid.ui.recyclerview.helpers.ItemClickViewHolderHelper
 import com.e.learningcleanandroid.utils.arraylist.addFilteredItems
+import com.e.learningcleanandroid.utils.arraylist.newItemsSubList
 
 open class GenericRecyclerViewAdapter<T>:RecyclerView.Adapter<GenericViewHolder<T>>() {
 
@@ -16,7 +17,8 @@ open class GenericRecyclerViewAdapter<T>:RecyclerView.Adapter<GenericViewHolder<
     protected var itemClick:ItemClickViewHolderHelper?=null
 
     fun addItems(items:ArrayList<T>){
-        this.items.addFilteredItems(items)
+        val newItems=this.items.newItemsSubList(items)
+        this.items.addAll(newItems)
         notifyDataSetChanged()
         shouldLoadMoreItems(false)
     }
