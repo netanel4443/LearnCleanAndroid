@@ -1,5 +1,10 @@
 package com.e.learningcleanandroid.utils.arraylist
 
+/**
+ *This function adds new items to the desired array.
+ * New items, which are already in the current array, won't be added.
+ *@param items the new items to add.
+ */
 fun <T> ArrayList<T>.addFilteredItems(items:ArrayList<T>){
     val tmpSet=toHashSet()
     items.forEach { item->

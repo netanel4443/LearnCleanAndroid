@@ -1,34 +1,26 @@
 package com.e.androidcleanarchitecture.utils.livedata
 
-import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.Observer
+import com.e.learningcleanandroid.utils.livedata.MviPrevAndCurrentState
 
-class MviMutableLiveData<T>: MutableLiveData<Pair<T?,T>> {
-    private var prevValue:T?=null
+class MviMutableLiveData<T>(initialVal: T) : MutableLiveData<MviPrevAndCurrentState<T>>(MviPrevAndCurrentState(initialVal,initialVal)) {
+    private var prevValue:T = initialVal
 
-
-    constructor():super()
-
-    constructor(initialVal:T):super(initialVal to initialVal){
-        prevValue=initialVal
-    }
 
     fun setMviValue(t:T){
-        val pair=prevValue to t
+        val prevAndCurrentState=MviPrevAndCurrentState(prevValue,t)
         prevValue=t
-        super.setValue(pair)
+        super.setValue(prevAndCurrentState)
     }
 
     fun postMviValue(t:T){
-        val pair=prevValue to t
+        val prevAndCurrentState=MviPrevAndCurrentState(prevValue,t)
         prevValue=t
-        super.postValue(pair)
+        super.postValue(prevAndCurrentState)
     }
 
-    fun currState():T?{
-        return value?.second
+    fun currState():T{
+        return value!!.currentState
     }
 
 }

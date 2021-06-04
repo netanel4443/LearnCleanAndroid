@@ -9,9 +9,9 @@ import com.e.learningcleanandroid.api.data.DogPhoto
 import com.e.learningcleanandroid.usecases.FavoriteDogPhotosUseCases
 import com.e.learningcleanandroid.usecases.MainActivityUseCases
 import com.e.learningcleanandroid.utils.arraylist.addFilteredItems
+import com.e.learningcleanandroid.utils.livedata.MviPrevAndCurrentState
 import com.e.learningcleanandroid.utils.logs.printErrorIfDebug
 import com.e.learningcleanandroid.utils.logs.printIfDebug
-import com.e.learningcleanandroid.utils.toArrayList
 import com.e.learningcleanandroid.viewmodels.common.BaseViewModel
 import com.e.learningcleanandroid.viewmodels.events.MainActivityEvents
 import com.e.learningcleanandroid.viewmodels.states.MainActivityStates
@@ -27,7 +27,7 @@ class MainActivityViewModel @Inject constructor(
 ) :BaseViewModel() {
 
     private val _viewState=MviMutableLiveData(MainActivityStates())
-    val viewStates:LiveData<Pair<MainActivityStates,MainActivityStates>> get()= _viewState as LiveData<Pair<MainActivityStates, MainActivityStates>>
+    val viewStates:LiveData<MviPrevAndCurrentState<MainActivityStates>> get()= _viewState
 
     private val _viewEvent=SingleLiveEvent<MainActivityEvents>()
     val viewEvent get()= _viewEvent
@@ -41,11 +41,11 @@ class MainActivityViewModel @Inject constructor(
     }
 
     fun getCachedDogPhotos(){
-        if (_viewState.value!!.second.dogPhotos.isEmpty()){
+        if (_viewState.value!!.currentState.dogPhotos.isEmpty()){
         useCases.getCachedDogPhotos()
             .doOnSuccess { cachedDogPhotos ->
-                val copy=  _viewState.currState()?.copy(dogPhotos = cachedDogPhotos)
-                postMviValue(copy!!)
+                val copy=  _viewState.currState().copy(dogPhotos = cachedDogPhotos)
+                postMviValue(copy)
                 if (cachedDogPhotos.isEmpty()) {
                     printIfDebug("im empty")
                     getDogPhotos()
@@ -65,9 +65,9 @@ class MainActivityViewModel @Inject constructor(
                 if (response.isSuccessful ){
                     //todo check if body can be null
                     response.body()?.let {body->
-                        val copy= _viewState.currState()?.copy()
+                        val copy= _viewState.currState().copy()
                         val tmpArrayList=ArrayList<DogPhoto>()
-                        tmpArrayList.addAll(copy?.dogPhotos!!)
+                        tmpArrayList.addAll(copy.dogPhotos)
                         tmpArrayList.addFilteredItems(body)
                         copy.dogPhotos=tmpArrayList
                         setMviValue(copy)
@@ -92,12 +92,12 @@ class MainActivityViewModel @Inject constructor(
         favoriteDogPhotosUseCases.saveFavoritePhoto(dogPhoto)
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe({isSaved->
-                val copy=_viewState.currState()?.copy()!!.favoriteDogPhotos
+                val copy=_viewState.currState().copy().favoriteDogPhotos
                 val tmpArray=ArrayList<DogPhoto>()
                 tmpArray.addAll(copy)
                 tmpArray.add(dogPhoto)
 
-                setMviValue(_viewState.currState()?.copy(favoriteDogPhotos = tmpArray)!!)
+                setMviValue(_viewState.currState().copy(favoriteDogPhotos = tmpArray))
 
                 val text=   if(isSaved) { "Saved" }
                 else{ "Already Saved" }
@@ -109,12 +109,12 @@ class MainActivityViewModel @Inject constructor(
 
     fun getFavoriteDogPhotos(){
         //get favorite photos from db only if we haven't received it yet
-        if (_viewState.currState()!!.favoriteDogPhotos.isEmpty()){
+        if (_viewState.currState().favoriteDogPhotos.isEmpty()){
         favoriteDogPhotosUseCases.getCachedDogPhotos()
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe({favoriteDogPhotos->
                 println(favoriteDogPhotos.size)
-                setMviValue(_viewState.currState()?.copy(favoriteDogPhotos =  favoriteDogPhotos)!!)
+                setMviValue(_viewState.currState().copy(favoriteDogPhotos =  favoriteDogPhotos))
             },::printErrorIfDebug)
         }
     }
@@ -124,10 +124,10 @@ class MainActivityViewModel @Inject constructor(
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe({
                 val tmpArrayList=ArrayList<DogPhoto>()
-                val copy=_viewState.currState()?.copy()!!.favoriteDogPhotos
+                val copy=_viewState.currState().copy().favoriteDogPhotos
                 tmpArrayList.addAll(copy)
                 tmpArrayList.removeAt(position)
-                setMviValue(_viewState.currState()?.copy(favoriteDogPhotos = tmpArrayList)!!)
+                setMviValue(_viewState.currState().copy(favoriteDogPhotos = tmpArrayList))
             },::printErrorIfDebug)
     }
 

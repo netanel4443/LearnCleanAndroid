@@ -76,8 +76,8 @@ class DogPhotosFragment : BaseFragment() {
 
     private fun initStateObservable() {
         viewModel.viewStates.observe(viewLifecycleOwner,  {
-            val oldState=it.first
-            val newState=it.second
+            val oldState=it.previousState
+            val newState=it.currentState
 
             if (dogPhotosAdapter.canLoadMoreItems()){
                 dogPhotosAdapter.addItems(newState.dogPhotos)

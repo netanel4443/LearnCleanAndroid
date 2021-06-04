@@ -9,15 +9,9 @@ import android.widget.Toast
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.e.learningcleanandroid.MainActivity
-import com.e.learningcleanandroid.api.data.DogPhoto
 import com.e.learningcleanandroid.databinding.FragmentDogPhotosBinding
-import com.e.learningcleanandroid.ui.recyclerview.adapters.DogPhotosRecyclerViewAdapter
 import com.e.learningcleanandroid.ui.recyclerview.adapters.FavoriteDogPhotosRecyclerViewAdapter
-import com.e.learningcleanandroid.ui.recyclerview.helpers.EndlessScrollListener
-import com.e.learningcleanandroid.ui.recyclerview.onviewclickinterfaces.DogPhotosViewHolderHelperClicks
 import com.e.learningcleanandroid.ui.recyclerview.onviewclickinterfaces.FavoriteDogPhotosViewHolderClickHelper
-import com.e.learningcleanandroid.utils.arraylist.newItemsSubList
-import com.e.learningcleanandroid.utils.logs.printIfDebug
 import com.e.learningcleanandroid.viewmodels.MainActivityViewModel
 import com.e.learningcleanandroid.viewmodels.events.MainActivityEvents
 
@@ -84,8 +78,8 @@ class FavoriteDogPhotosFragment : BaseFragment() {
 
     private fun initStateObservable() {
         viewModel.viewStates.observe(viewLifecycleOwner,  {
-            val oldState=it.first
-            val newState=it.second
+            val oldState=it.previousState
+            val newState=it.currentState
                 println("${oldState.favoriteDogPhotos.size}=${newState.favoriteDogPhotos.size}")
             if (oldState.favoriteDogPhotos!=newState.favoriteDogPhotos){
                 favoriteDogPhotosAdapter.addItems(newState.favoriteDogPhotos)
