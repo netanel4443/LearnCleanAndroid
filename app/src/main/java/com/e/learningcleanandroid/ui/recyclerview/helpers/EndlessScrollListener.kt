@@ -6,17 +6,17 @@ import com.e.androidcleanarchitecture.ui.recyclerview.viewholders.GenericViewHol
 import com.e.learningcleanandroid.utils.logs.printIfDebug
 import kotlin.math.roundToInt
 
-class EndlessScrollListener<T>( ):RecyclerView.OnScrollListener() {
+class EndlessScrollListener<T>(recyclerView: RecyclerView, percentage: Int) : RecyclerView.OnScrollListener() {
     private var isLoading=false
-    private var percentageToLoadMoreItems=75
+    private  var percentageToLoadMoreItems:Int = percentage
     private var currentItemCount=0
     var loadMore:(()-> Unit)? = null
     private var layoutManager:RecyclerView.LayoutManager?=null
-    private var adapter:GenericRecyclerViewAdapter<T>?=null
+    private var adapter:RecyclerView.Adapter<RecyclerView.ViewHolder>?=null
 
-    constructor(recyclerView: RecyclerView):this(){
+    init {
         layoutManager=recyclerView.layoutManager
-        adapter=recyclerView.adapter as GenericRecyclerViewAdapter<T>
+        adapter=recyclerView.adapter
     }
 
 
@@ -32,7 +32,7 @@ class EndlessScrollListener<T>( ):RecyclerView.OnScrollListener() {
         val range = recyclerView.computeVerticalScrollRange()
 
         val percentage = (100.0f * offset / (range - extent).toFloat()).toInt()
-//        printIfDebug(percentage)
+
         if (percentage>=percentageToLoadMoreItems ) {
 
             if (currentItemCount!=itemCount){ //need to update it when items are added.
@@ -41,7 +41,6 @@ class EndlessScrollListener<T>( ):RecyclerView.OnScrollListener() {
             }
 
             if ( itemCount == currentItemCount && !isLoading ) {
-                adapter!!.shouldLoadMoreItems(true)//The adapter will change this to false after new items are added
                 isLoading=true
                 loadMore?.invoke()
             }

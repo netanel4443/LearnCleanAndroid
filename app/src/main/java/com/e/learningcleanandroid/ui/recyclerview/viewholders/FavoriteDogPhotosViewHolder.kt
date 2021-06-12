@@ -14,6 +14,10 @@ class FavoriteDogPhotosViewHolder(private val binding: DogPhotoCellDesignRecycle
     private val dogInformation=binding.dogInformation
     private val favoriteBtn=binding.favoriteBtn
 
+    init {
+
+    }
+
     override fun bind(item: DogPhoto) {
 
         Picasso.get().load(item.url).into(dogImg)

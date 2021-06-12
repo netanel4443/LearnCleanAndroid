@@ -8,8 +8,8 @@ import javax.inject.Inject
 import kotlin.collections.ArrayList
 
 @ActivityScope
-class MainActivityApi @Inject constructor(
-        private val dogPhotoApi: TheDogApi) {
+class DogImagesApi @Inject constructor(
+        private val dogPhotoApi: IDogApi) {
 
     fun getDogPhotosRequest(): Observable<Response<ArrayList<DogPhoto>>> {
 

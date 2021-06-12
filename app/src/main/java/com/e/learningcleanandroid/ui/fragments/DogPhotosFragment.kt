@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.fragment.app.commit
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.e.learningcleanandroid.MainActivity
@@ -13,6 +14,7 @@ import com.e.learningcleanandroid.databinding.FragmentDogPhotosBinding
 import com.e.learningcleanandroid.ui.recyclerview.adapters.DogPhotosRecyclerViewAdapter
 import com.e.learningcleanandroid.ui.recyclerview.helpers.EndlessScrollListener
 import com.e.learningcleanandroid.ui.recyclerview.onviewclickinterfaces.DogPhotosViewHolderHelperClicks
+import com.e.learningcleanandroid.utils.arraylist.newItemsSubList
 import com.e.learningcleanandroid.utils.logs.printIfDebug
 import com.e.learningcleanandroid.viewmodels.MainActivityViewModel
 
@@ -42,10 +44,8 @@ class DogPhotosFragment : BaseFragment() {
 
         initRecyclerView(binding.recyclerView,view.context)
         initStateObservable()
-        /* if no items, invoke. This line is added in order to prevent
-                unnecessary calls due configuration changes*/
 
-            viewModel.getCachedDogPhotos()
+        viewModel.getCachedDogPhotos()
 
     }
 
@@ -65,7 +65,7 @@ class DogPhotosFragment : BaseFragment() {
             recyclerView.setHasFixedSize(true)
 
 
-            val endlessScrollListener= EndlessScrollListener<DogPhoto>(recyclerView)
+            val endlessScrollListener= EndlessScrollListener<DogPhoto>(recyclerView,75)
             recyclerView.addOnScrollListener(endlessScrollListener)
             endlessScrollListener.loadMore={
                 printIfDebug("load more dog images")
@@ -78,13 +78,27 @@ class DogPhotosFragment : BaseFragment() {
         viewModel.viewStates.observe(viewLifecycleOwner,  {
             val oldState=it.previousState
             val newState=it.currentState
+            printIfDebug("${oldState.dogPhotos.size}=${newState.dogPhotos.size}")
 
-            if (dogPhotosAdapter.canLoadMoreItems()){
-                dogPhotosAdapter.addItems(newState.dogPhotos)
+            if (oldState.dogPhotos!=newState.dogPhotos || dogPhotosAdapter.isEmpty()){
+                addNewNotDuplicatedItemsToRecyclerViewAdapter(newState.dogPhotos)
             }
+
         })
     }
+    private fun addNewNotDuplicatedItemsToRecyclerViewAdapter(newItems:ArrayList<DogPhoto>){
+        val newNotDuplicatedItems=dogPhotosAdapter.items.newItemsSubList(newItems)
+        dogPhotosAdapter.addItems(newNotDuplicatedItems)
+
     }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding=null
+    }
+}
+
+
 
 
 

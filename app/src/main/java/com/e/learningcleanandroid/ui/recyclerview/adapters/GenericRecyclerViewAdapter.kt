@@ -17,10 +17,8 @@ open class GenericRecyclerViewAdapter<T>:RecyclerView.Adapter<GenericViewHolder<
     protected var itemClick:ItemClickViewHolderHelper?=null
 
     fun addItems(items:ArrayList<T>){
-        val newItems=this.items.newItemsSubList(items)
-        this.items.addAll(newItems)
+        this.items.addAll(items)
         notifyDataSetChanged()
-        shouldLoadMoreItems(false)
     }
 
     fun addItem(item:T){
@@ -56,8 +54,6 @@ open class GenericRecyclerViewAdapter<T>:RecyclerView.Adapter<GenericViewHolder<
     }
 
     fun isEmpty():Boolean= itemCount==0
-
-    fun canLoadMoreItems():Boolean = shouldLoadMoreItems || isEmpty()
 
     fun shouldLoadMoreItems(load:Boolean){
         shouldLoadMoreItems=load

@@ -1,7 +1,7 @@
 package com.e.learningcleanandroid.di.modules
 
 import com.e.androidcleanarchitecture.di.scopes.ApplicationScope
-import com.e.learningcleanandroid.api.TheDogApi
+import com.e.learningcleanandroid.api.IDogApi
 import dagger.Module
 import dagger.Provides
 import retrofit2.Retrofit
@@ -24,8 +24,8 @@ class ApplicationModule {
 
  @ApplicationScope
  @Provides
- fun provideTheDogApi(retrofit: Retrofit): TheDogApi {
-     return retrofit.create(TheDogApi::class.java)
+ fun provideTheDogApi(retrofit: Retrofit): IDogApi {
+     return retrofit.create(IDogApi::class.java)
  }
 
 

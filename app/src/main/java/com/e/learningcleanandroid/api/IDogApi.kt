@@ -8,7 +8,7 @@ import retrofit2.http.GET
 import retrofit2.http.Headers
 import retrofit2.http.Query
 
-interface TheDogApi {
+interface IDogApi {
 
     @Headers("x-api-key: b4b78a43-25d4-42ea-aed8-af310548cfc6")
     @GET("v1/images/search?size=small")

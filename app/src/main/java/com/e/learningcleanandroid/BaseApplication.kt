@@ -1,4 +1,4 @@
-package com.e.learningcleanandroid.di
+package com.e.learningcleanandroid
 
 import android.app.Application
 import com.e.learningcleanandroid.di.graphs.DaggerApplicationGraph

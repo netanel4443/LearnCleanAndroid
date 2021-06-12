@@ -2,7 +2,6 @@ package com.e.learningcleanandroid
 
 import android.os.Bundle
 import com.e.learningcleanandroid.databinding.ActivityMainBinding
-import com.e.learningcleanandroid.di.BaseApplication
 import com.e.learningcleanandroid.di.graphs.MainActivityGraph
 import com.e.learningcleanandroid.ui.BaseActivity
 import com.e.learningcleanandroid.ui.fragments.ViewSwipeFragment

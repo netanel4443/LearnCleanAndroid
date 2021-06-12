@@ -9,9 +9,12 @@ import android.widget.Toast
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.e.learningcleanandroid.MainActivity
+import com.e.learningcleanandroid.api.data.DogPhoto
 import com.e.learningcleanandroid.databinding.FragmentDogPhotosBinding
 import com.e.learningcleanandroid.ui.recyclerview.adapters.FavoriteDogPhotosRecyclerViewAdapter
 import com.e.learningcleanandroid.ui.recyclerview.onviewclickinterfaces.FavoriteDogPhotosViewHolderClickHelper
+import com.e.learningcleanandroid.utils.arraylist.newItemsSubList
+import com.e.learningcleanandroid.utils.logs.printIfDebug
 import com.e.learningcleanandroid.viewmodels.MainActivityViewModel
 import com.e.learningcleanandroid.viewmodels.events.MainActivityEvents
 
@@ -80,11 +83,21 @@ class FavoriteDogPhotosFragment : BaseFragment() {
         viewModel.viewStates.observe(viewLifecycleOwner,  {
             val oldState=it.previousState
             val newState=it.currentState
-                println("${oldState.favoriteDogPhotos.size}=${newState.favoriteDogPhotos.size}")
-            if (oldState.favoriteDogPhotos!=newState.favoriteDogPhotos){
-                favoriteDogPhotosAdapter.addItems(newState.favoriteDogPhotos)
+                printIfDebug("${oldState.favoriteDogPhotos.size}=${newState.favoriteDogPhotos.size}")
+            if (oldState.favoriteDogPhotos!=newState.favoriteDogPhotos || favoriteDogPhotosAdapter.isEmpty()){
+                addNewNotDuplicatedItemsToRecyclerViewAdapter(newState.favoriteDogPhotos)
             }
         })
     }
 
+    private fun addNewNotDuplicatedItemsToRecyclerViewAdapter(newItems:ArrayList<DogPhoto>){
+        val newNotDuplicatedItems=favoriteDogPhotosAdapter.items.newItemsSubList(newItems)
+        favoriteDogPhotosAdapter.addItems(newNotDuplicatedItems)
+
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding=null
+    }
 }
