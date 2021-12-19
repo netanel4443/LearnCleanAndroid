@@ -2,6 +2,7 @@ package com.e.learningcleanandroid.di.modules
 
 import com.e.androidcleanarchitecture.di.scopes.ApplicationScope
 import com.e.learningcleanandroid.api.IDogApi
+import com.e.learningcleanandroid.utils.logs.printIfDebug
 import dagger.Module
 import dagger.Provides
 import retrofit2.Retrofit

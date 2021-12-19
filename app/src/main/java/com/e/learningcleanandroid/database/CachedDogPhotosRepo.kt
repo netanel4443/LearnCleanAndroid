@@ -8,6 +8,7 @@ import com.e.learningcleanandroid.database.data.cachedDogPhotos.CachedDogBreedsR
 import com.e.learningcleanandroid.database.data.cachedDogPhotos.CachedDogPhotosRealmObj
 import com.e.learningcleanandroid.utils.logs.printIfDebug
 import com.e.learningcleanandroid.utils.realm.rxCompletableExecuteTransactionAsync
+import com.e.learningcleanandroid.utils.realm.rxGetData
 import com.e.learningcleanandroid.utils.realm.rxSingleExecuteTransactionAsync
 import com.e.learningcleanandroid.utils.realm.toArrayList
 import io.reactivex.rxjava3.core.Completable
@@ -20,38 +21,36 @@ class CachedDogPhotosRepo @Inject constructor(private val config:GeneralDogImage
     val realm: Realm =  config.getRealmInstance()
     // if there is no cached data , return an empty array
   fun getCachedDogPhotos():Single<ArrayList<DogPhoto>>{
-    return realm.rxSingleExecuteTransactionAsync{realm->
-             val arrayList=ArrayList<DogPhoto>()
-                printIfDebug("get cached dog images")
-                val cachedArrayList= realm.where(CachedDogPhotosRealmObj::class.java)
-                        .findAll()?.toArrayList()
 
-                if (cachedArrayList==null) { return@rxSingleExecuteTransactionAsync arrayList }
+    return  realm.rxGetData(CachedDogPhotosRealmObj::class.java) { cachedArrayList ->
 
-                cachedArrayList.forEach { cachedDogObj->
-                    val theDogPhoto= DogPhoto(
-                            id=cachedDogObj.id,
-                            url=cachedDogObj.url,
-                    )
+        val arrayList = ArrayList<DogPhoto>()
+        printIfDebug("get cached dog images")
 
-                    val cachedBreedArray=cachedDogObj.breeds
-                    val breedsArray=ArrayList<Breeds>()
+        cachedArrayList.forEach { cachedDogObj ->
+            val theDogPhoto = DogPhoto(
+                    id = cachedDogObj.id,
+                    url = cachedDogObj.url,
+            )
 
-                    if (cachedBreedArray.isNotEmpty()) {
-                        val cachedBreeds=cachedBreedArray.first()
-                        val breeds = Breeds(
-                                origin = cachedBreeds!!.origin,
-                                name = cachedBreeds.name,
-                                lifeSpan = cachedBreeds.lifeSpan
-                        )
-                        breedsArray.add(breeds) // add only if we have breeds , otherwise keep empty
-                    }
-                    theDogPhoto.breeds= breedsArray
-                    arrayList.add(theDogPhoto)
-                    println("cahced ${arrayList.size}")
-                }
-           return@rxSingleExecuteTransactionAsync arrayList
-           }
+            val cachedBreedArray = cachedDogObj.breeds
+            val breedsArray = ArrayList<Breeds>()
+
+            if (cachedBreedArray.isNotEmpty()) {
+                val cachedBreeds = cachedBreedArray.first()
+                val breeds = Breeds(
+                        origin = cachedBreeds!!.origin,
+                        name = cachedBreeds.name,
+                        lifeSpan = cachedBreeds.lifeSpan
+                )
+                breedsArray.add(breeds) // add, only if we have breeds otherwise, keep empty
+            }
+            theDogPhoto.breeds = breedsArray
+            arrayList.add(theDogPhoto)
+            println("cached ${arrayList.size}")
+        }
+        return@rxGetData arrayList
+    }
     }
 
    private fun deletePrevCachedDogImages():Completable {

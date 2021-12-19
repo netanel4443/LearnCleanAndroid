@@ -22,7 +22,7 @@ import com.e.learningcleanandroid.viewmodels.MainActivityViewModel
 class DogPhotosFragment : BaseFragment() {
 
     private val viewModel:MainActivityViewModel by lazy(this::getViewModel)
-    private  var _binding:FragmentDogPhotosBinding?=null
+    private var _binding:FragmentDogPhotosBinding?=null
     private val binding get() = _binding!!
     private lateinit var dogPhotosAdapter:DogPhotosRecyclerViewAdapter
 
@@ -30,6 +30,7 @@ class DogPhotosFragment : BaseFragment() {
         super.onAttach(context)
         (activity as MainActivity).activityGraph.inject(this)
     }
+
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -44,7 +45,6 @@ class DogPhotosFragment : BaseFragment() {
 
         initRecyclerView(binding.recyclerView,view.context)
         initStateObservable()
-
         viewModel.getCachedDogPhotos()
 
     }
